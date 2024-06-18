@@ -829,16 +829,6 @@ func parseCPUMetrics(powermetricsOutput string, cpuMetrics CPUMetrics, modelName
 	return cpuMetrics
 }
 
-func max(nums ...int) int {
-	maxVal := nums[0]
-	for _, num := range nums[1:] {
-		if num > maxVal {
-			maxVal = num
-		}
-	}
-	return maxVal
-}
-
 func parseGPUMetrics(powermetricsOutput string, gpuMetrics GPUMetrics) GPUMetrics {
 
 	lines := strings.Split(powermetricsOutput, "\n")
