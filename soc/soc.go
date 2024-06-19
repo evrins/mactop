@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type SocInfo struct {
@@ -29,30 +30,33 @@ func GetSOCInfo() *SocInfo {
 		return socInfo
 	}
 
-	m := getSysCtlProperties("machdep.cpu", "hw.perflevel0.logicalcpu", "hw.perflevel1.logicalcpu")
+	sync.OnceFunc(func() {
+		m := getSysCtlProperties("machdep.cpu", "hw.perflevel0.logicalcpu", "hw.perflevel1.logicalcpu")
 
-	name := m["machdep.cpu.brand_string"]
-	coreCount := m["machdep.cpu.core_count"]
-	eCoreCount, err := strconv.Atoi(m["hw.perflevel1.logicalcpu"])
-	if err != nil {
-		logrus.Fatalf("failed to parse hw.perflevel1.logicalcpu, err: %v", err)
-	}
-	pCoreCount, err := strconv.Atoi(m["hw.perflevel0.logicalcpu"])
-	if err != nil {
-		logrus.Errorf("failed to parse hw.perflevel0.logicalcpu, err: %v", err)
-	}
+		name := m["machdep.cpu.brand_string"]
+		coreCount := m["machdep.cpu.core_count"]
+		eCoreCount, err := strconv.Atoi(m["hw.perflevel1.logicalcpu"])
+		if err != nil {
+			logrus.Fatalf("failed to parse hw.perflevel1.logicalcpu, err: %v", err)
+		}
+		pCoreCount, err := strconv.Atoi(m["hw.perflevel0.logicalcpu"])
+		if err != nil {
+			logrus.Errorf("failed to parse hw.perflevel0.logicalcpu, err: %v", err)
+		}
 
-	socInfo = &SocInfo{
-		Name:         name,
-		CoreCount:    coreCount,
-		CpuMaxPower:  "",
-		GpuMaxPower:  "",
-		CpuMaxBw:     "",
-		GpuMaxBw:     "",
-		ECoreCount:   eCoreCount,
-		PCoreCount:   pCoreCount,
-		GpuCoreCount: getGPUCores(),
-	}
+		socInfo = &SocInfo{
+			Name:         name,
+			CoreCount:    coreCount,
+			CpuMaxPower:  "",
+			GpuMaxPower:  "",
+			CpuMaxBw:     "",
+			GpuMaxBw:     "",
+			ECoreCount:   eCoreCount,
+			PCoreCount:   pCoreCount,
+			GpuCoreCount: getGPUCores(),
+		}
+	})()
+
 	return socInfo
 }
 
