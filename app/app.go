@@ -31,6 +31,7 @@ func Start(updateInterval int, colorName string) {
 
 	term := ui.NewUI(colorName,
 		updateInterval,
+		appleSiliconModel,
 		done,
 		quit,
 		cpuMetricsChan,

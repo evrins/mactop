@@ -22,7 +22,7 @@ const (
 )
 
 type UI struct {
-	socInfo           soc.SocInfo
+	socInfo           *soc.SocInfo
 	colorName         string
 	currentGridLayout GridLayout
 	lastUpdateTime    time.Time
@@ -45,7 +45,9 @@ type UI struct {
 	powerValues []float64
 }
 
-func NewUI(colorName string, updateInterval int,
+func NewUI(colorName string,
+	updateInterval int,
+	socInfo *soc.SocInfo,
 	done chan struct{},
 	quit <-chan os.Signal,
 	cpuMetricsChan chan parser.CPUMetrics,
@@ -56,6 +58,8 @@ func NewUI(colorName string, updateInterval int,
 	var ui = &UI{}
 	ui.colorName = colorName
 	ui.updateInterval = updateInterval
+
+	ui.socInfo = socInfo
 
 	ui.done = done
 	ui.quit = quit
@@ -136,7 +140,7 @@ func (ui *UI) switchGridLayout() {
 }
 
 func (ui *UI) setupWidgets() {
-	appleSiliconModel := soc.GetSOCInfo()
+	appleSiliconModel := ui.socInfo
 	ui.modelText = widgets.NewParagraph()
 	ui.modelText.Title = "Apple Silicon"
 	modelName := appleSiliconModel.Name
